@@ -138,11 +138,25 @@ it remotely. Actual server configuration, keys, and credentials are not included
   no matches shows `No Records Found`.
 - The `Contacts` table comes from the lab schema but is not used by this app.
 
-## Credits and AI use
+## Credits
 
-The project is based on the course's COLORS LAMP starter files. OpenAI Codex
-helped with server setup, PHP and JavaScript fixes, testing, organizing the
-repository, and drafting this README.
+The project is based on the course's COLORS LAMP starter files.
+
+## AI Assistance Disclosure
+
+This project was developed with assistance from generative AI tools:
+
+- **Tool:** OpenAI Codex (GPT-6), accessed through the Codex desktop app.
+- **Dates:** September 23 and 27, 2026.
+- **Scope:** SSH, DNS, HTTPS, database setup, external PHP database configuration,
+  PHP API endpoints, frontend API connection, Git workflow, and documentation.
+- **Nature of use:** Explanations and debugging guidance, code and server
+  configuration changes, automated testing, repository organization, and drafting
+  the README.
+
+Codex applied code and configuration changes and ran checks for valid and invalid
+login, adding colors, searching, and persistence. I directed the work and chose
+when to commit and push each stage.
 
 ## License
 
