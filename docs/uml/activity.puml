@@ -1,0 +1,81 @@
+@startuml
+title COLORS — Log In, Manage Colors, and Log Out
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 14
+skinparam backgroundColor white
+skinparam activity {
+  BackgroundColor #EFF6FF
+  BorderColor #334155
+  DiamondBackgroundColor #FEF3C7
+  DiamondBorderColor #334155
+}
+
+start
+:Open index.html;
+
+partition "Log in" {
+  repeat
+    :User enters login and password;\nclicks Do It;
+    :Browser doLogin(): reset user state;\nPOST /LAMPAPI/Login.php\nJSON: login, password;
+    :Login.php connects to MySQL;\nqueries Users by Login and Password;
+    :API returns matching ID and names,\nor id = 0 and "No Records Found";
+    :Browser reads response id into userId;
+    if (userId < 1?) then (yes)
+      :Display "User/Password\ncombination incorrect";
+    else (no)
+    endif
+  repeat while (userId < 1?) is (retry) not (logged in)
+
+  :Store firstName and lastName;\nsaveCookie(): save names and userId\nwith expiry 20 minutes from login;
+  :Open color.html; readCookie();
+  if (Cookie userId < 1?) then (yes)
+    :Redirect to index.html;
+    stop
+  else (no)
+    :Display logged-in user's name;
+  endif
+}
+
+partition "Manage colors" {
+  repeat
+    :User chooses Add Color, Search Color, or Log Out;
+    switch (Chosen action)
+    case (Add Color)
+      :User enters a color name;\nbrowser addColor() clears add feedback;
+      :POST /LAMPAPI/AddColor.php\nJSON: color, userId;
+      :AddColor.php connects to MySQL;\nINSERT into Colors (UserId, Name)\nusing supplied userId and color;
+      :API returns error = empty string;
+      :Browser displays returned error if nonempty;\notherwise "Color has been added";
+    case (Search Color)
+      :User enters search text;\nbrowser searchColor() clears\nsearch feedback and old results;
+      :POST /LAMPAPI/SearchColors.php\nJSON: search, userId;
+      :SearchColors.php connects to MySQL;\nbuilds pattern as "%" . search . "%";\nSELECT Name from Colors\nWHERE Name LIKE ? AND UserID = ?;
+      note right
+        Bind the pattern and supplied userId.
+        Empty search produces %% (all user's colors).
+      end note
+      if (Any matching colors?) then (yes)
+        :API returns results = color names,\nerror = empty string;
+      else (no)
+        :API returns results = empty array,\nerror = "No Records Found";
+      endif
+      if (Response error nonempty?) then (yes)
+        :Browser displays error text;
+      else (no)
+        :Browser displays retrieval message\nand color names as text, one per line;
+      endif
+    case (Log Out)
+      :Browser doLogout():\nreset userId and names; expire cookie;
+      :Redirect to index.html;
+    endswitch
+  repeat while (Action was not Log Out?) is (choose again) not (logged out)
+}
+
+stop
+legend bottom
+  Scope: a login-page visit through logout, with database operations succeeding
+  and JSON responses delivered as HTTP 200. Includes invalid login, no matches,
+  and the color-page cookie guard. Technical failure limits are in README.md.
+endlegend
+@enduml

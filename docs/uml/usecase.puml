@@ -1,0 +1,51 @@
+@startuml
+!pragma layout smetana
+title COLORS — Use Case Diagram
+left to right direction
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 15
+skinparam backgroundColor white
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #EFF6FF
+  BorderColor #334155
+}
+skinparam rectangleBorderColor #334155
+
+actor User
+
+rectangle "COLORS web application" {
+  usecase "Log in" as Login
+  usecase "Add a color name" as Add
+  usecase "Search saved colors" as Search
+  usecase "Log out" as Logout
+}
+
+User -- Login
+User -- Add
+User -- Search
+User -- Logout
+
+note right of Login
+  Existing account required.
+  Invalid credentials display an error.
+end note
+
+note right of Add
+  Add, search, and logout are on color.html.
+  The page reads the login cookie on load.
+  This is a browser UI precondition;
+  the APIs do not verify a server session.
+end note
+
+note right of Search
+  Searches color names for the supplied user ID.
+  Empty search returns all that user's colors.
+end note
+
+note right of Logout
+  Clears browser state and expires the cookie.
+  Returns to index.html; no logout API call.
+end note
+@enduml

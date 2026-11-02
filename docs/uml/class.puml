@@ -1,0 +1,113 @@
+@startuml
+!pragma layout smetana
+title COLORS — Class Diagram (Modules and Data Entities)
+skinparam shadowing false
+skinparam defaultFontName SansSerif
+skinparam defaultFontSize 14
+skinparam backgroundColor white
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #EFF6FF
+  BorderColor #334155
+}
+hide empty members
+hide circle
+
+class "code.js" as Browser <<module>> {
+  userId : number = 0
+  firstName : string = ""
+  lastName : string = ""
+  --
+  doLogin()
+  saveCookie()
+  readCookie()
+  doLogout()
+  addColor()
+  searchColor()
+}
+
+class "Login.php" as Login <<module>> {
+  getRequestInfo()
+  sendResultInfoAsJson(obj)
+  returnWithError(err)
+  returnWithInfo(firstName, lastName, id)
+}
+
+class "AddColor.php" as Add <<module>> {
+  getRequestInfo()
+  sendResultInfoAsJson(obj)
+  returnWithError(err)
+}
+
+class "SearchColors.php" as Search <<module>> {
+  getRequestInfo()
+  sendResultInfoAsJson(obj)
+  returnWithError(err)
+  returnWithInfo(searchResults)
+}
+
+class "connection.php" as Connection <<module>> {
+  connectToDatabase() : mysqli
+}
+
+class Users <<entity>> {
+  {field} ID : int {PK, auto_increment}
+  {field} FirstName : varchar(50)
+  {field} LastName : varchar(50)
+  {field} Login : varchar(50)
+  {field} Password : varchar(50)
+}
+
+class Colors <<entity>> {
+  {field} ID : int {PK, auto_increment}
+  {field} Name : varchar(50)
+  {field} UserID : int
+}
+
+Browser ..> Login : POST Login.php\n{login, password}
+Browser ..> Add : POST AddColor.php\n{color, userId}
+Browser ..> Search : POST SearchColors.php\n{search, userId}
+
+Login ..> Connection : calls
+Add ..> Connection : calls
+Search ..> Connection : calls
+
+Login ..> Users : SELECT by Login and Password
+Add ..> Colors : INSERT UserID and Name
+Search ..> Colors : SELECT Name by LIKE and UserID
+
+Users "0..1" -- "0..*" Colors : UserID refers to ID\n(logical association)
+
+note left of Browser
+  Used by index.html and color.html.
+  API URLs start with /LAMPAPI/.
+  Login state is stored in a browser cookie.
+  Logout has no API endpoint.
+end note
+
+note right of Connection
+  Opens MySQL using environment settings.
+  Sets connection charset to utf8mb4.
+end note
+
+note bottom of Users
+  Entity attributes match database/schema.sql.
+  Password is compared as stored plain text.
+  No UNIQUE constraint on Login.
+end note
+
+note bottom of Colors
+  No foreign key enforces UserID.
+  PHP trusts the submitted userId, so a color
+  can reference no existing Users row (0..1).
+  No composition or cascade deletion.
+end note
+
+legend bottom
+  <<module>> groups actual top-level functions and globals by source file.
+  <<entity>> represents a persisted table as a UML data entity.
+  These boxes are modeling abstractions; no JavaScript or PHP classes are declared.
+  Dashed arrows are dependencies; the solid line is a logical data association.
+  Contacts exists in the schema but is unused by the COLORS application and omitted.
+endlegend
+@enduml
