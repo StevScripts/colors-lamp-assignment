@@ -48,8 +48,10 @@ responses arrive. It is not an exhaustive network or database failure model:
 - Each endpoint also has a `connect_error` branch using `returnWithError()`.
   Add and search display a returned nonempty error on HTTP 200; login checks
   the returned ID. There is no general SQL-exception handler in the endpoints.
-- The browser's `try/catch` can display synchronous errors during request setup
-  or sending. It does not catch later asynchronous JSON parsing errors.
+- The browser catches synchronous errors inside each request's `try` block,
+  including errors thrown by `xhr.send()`. Request construction, `open()`, and
+  header setup occur before that block. Later asynchronous JSON parsing errors
+  are not caught.
 - `readCookie()` runs on color-page load. There is no timer that logs out an
   already-open page when the cookie expires, and no server logout request.
 
